@@ -44,6 +44,24 @@ class Product(models.Model):
     def __str__(self):
         return self.title
 
+    @staticmethod
+    def get_product(params=None):
+        products = Product.objects.all()
+        data_serializer = []
+        for product in products:
+            data_serializer.append({
+                "id": product.id,
+                "title": product.title,
+                "type_id": product.type_id.id,
+                "model_id": product.model_id.id,
+                "manufacturer_id": product.manufacturer_id.id,
+                "description": product.description,
+                "price": product.price
+            })
+        return data_serializer
+
+
+
 
 class Order(models.Model):
     customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
