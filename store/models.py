@@ -24,6 +24,9 @@ class Clients(models.Model):
             })
         return data_serializer
 
+    # @staticmethod
+    # def put_clients(params=None):
+
 
 class Groups(models.Model):
     title = models.CharField(max_length=255)
@@ -119,16 +122,22 @@ class Orders(models.Model):
         return f'Номер заказа: {self.id}'
 
 
-def get_orders(params=None):
-    orders = Orders.objects.all()
-    data_serializer = []
-    for order in orders:
-        data_serializer.append({
-            "id": order.id,
-            "customer_last_name": order.client.last_name,
-            "customer_first_name": order.client.first_name,
-            "customer_patronymic": order.client.patronymic,
-            "products": [i.nomenclature.title for i in order.products.all()],
-            "date_time": order.date_time.strftime('%H:%M %Y.%m.%d')
-        })
-    return data_serializer
+    def get_orders(params=None):
+        orders = Orders.objects.all()
+        data_serializer = []
+        for order in orders:
+            data_serializer.append({
+                "id": order.id,
+                "customer_last_name": order.client.last_name,
+                "customer_first_name": order.client.first_name,
+                "customer_patronymic": order.client.patronymic,
+                "products": [
+                    {
+                        "id": i.nomenclature.id,
+                        "title": i.nomenclature.title,
+                        "manufacturer": i.nomenclature.manufacturer.title,
+                        "group": i.nomenclature.group.title
+                    } for i in order.products.all()],
+                "date_time": order.date_time.strftime('%H:%M %Y.%m.%d')
+            })
+        return data_serializer
