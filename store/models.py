@@ -1,11 +1,7 @@
-import datetime
-
-import ins as ins
-import products.products
 from django.db import models
 
 
-class Customer(models.Model):
+class Clients(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
     patronymic = models.CharField(max_length=255, null=True)
@@ -15,47 +11,47 @@ class Customer(models.Model):
         return f'{self.first_name} {self.last_name} {self.patronymic}'
 
     @staticmethod
-    def get_customer(params=None):
-        customers = Customer.objects.all()
+    def get_clients(params=None):
+        clients = Clients.objects.all()
         data_serializer = []
-        for customer in customers:
+        for client in clients:
             data_serializer.append({
-                "id": customer.id,
-                "last_name": customer.last_name,
-                "first_name": customer.first_name,
-                "patronymic": customer.patronymic,
-                "address": customer.address
+                "id": client.id,
+                "last_name": client.last_name,
+                "first_name": client.first_name,
+                "patronymic": client.patronymic,
+                "address": client.address
             })
         return data_serializer
 
 
-class Type(models.Model):
+class Groups(models.Model):
     title = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
 
     @staticmethod
-    def get_type(params=None):
-        types = Type.objects.all()
+    def get_groups(params=None):
+        groups = Groups.objects.all()
         data_serializer = []
-        for type in types:
+        for group in groups:
             data_serializer.append({
-                "id": type.id,
-                "title": type.title,
+                "id": group.id,
+                "title": group.title,
             })
         return data_serializer
 
 
-class Manufacturer(models.Model):
+class Manufacturers(models.Model):
     title = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
 
     @staticmethod
-    def get_manufacturer(params=None):
-        manufacturers = Manufacturer.objects.all()
+    def get_manufacturers(params=None):
+        manufacturers = Manufacturers.objects.all()
         data_serializer = []
         for manufacturer in manufacturers:
             data_serializer.append({
@@ -65,65 +61,66 @@ class Manufacturer(models.Model):
         return data_serializer
 
 
-class Model(models.Model):
+class Nomenclature(models.Model):
     title = models.CharField(max_length=255)
-    manufacturer_id = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
+    manufacturer = models.ForeignKey(Manufacturers, on_delete=models.CASCADE)
+    group = models.ForeignKey(Groups, on_delete=models.CASCADE)
+    description = models.CharField(max_length=255)
 
     def __str__(self):
         return self.title
 
     @staticmethod
-    def get_model(params=None):
-        models = Model.objects.all()
+    def get_nomenclature(params=None):
+        nomenclature = Nomenclature.objects.all()
         data_serializer = []
-        for model in models:
+        for nomenclatur in nomenclature:
             data_serializer.append({
-                "id": model.id,
-                "title": model.title,
-                "manufacturer_id": model.manufacturer_id.title
+                "id": nomenclatur.id,
+                "title": nomenclatur.title,
+                "manufacturer": nomenclatur.manufacturer.title,
+                "group": nomenclatur.group.title,
+                "description": nomenclatur.description
             })
         return data_serializer
 
 
-class Product(models.Model):
-    title = models.CharField(max_length=255)
-    type_id = models.ForeignKey(Type, on_delete=models.CASCADE)
-    model_id = models.ForeignKey(Model, on_delete=models.CASCADE)
-    manufacturer_id = models.ForeignKey(Manufacturer, on_delete=models.CASCADE)
-    description = models.CharField(max_length=255)
+class Products(models.Model):
+    nomenclature = models.ForeignKey(Nomenclature, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    count = models.IntegerField()
 
     def __str__(self):
-        return self.title
+        return self.nomenclature.title
 
     @staticmethod
-    def get_product(params=None):
-        products = Product.objects.all()
+    def get_products(params=None):
+        products = Products.objects.all()
         data_serializer = []
         for product in products:
             data_serializer.append({
                 "id": product.id,
-                "title": product.title,
-                "type_id": product.type_id.title,
-                "model_id": product.model_id.title,
-                "manufacturer_id": product.manufacturer_id.title,
-                "description": product.description,
-                "price": product.price
+                "title": product.nomenclature.title,
+                "group": product.nomenclature.group,
+                "manufacturer": product.nomenclature.manufacturer,
+                "description": product.nomenclature.description,
+                "price": product.price,
+                "count": products.count
             })
         return data_serializer
 
 
-class Order(models.Model):
-    customer_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product)
+class Orders(models.Model):
+    client = models.ForeignKey(Clients, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Products)
     date_time = models.DateTimeField()
 
     def __str__(self):
         return f'Номер заказа: {self.id}'
 
     @staticmethod
-    def get_order(params=None):
-        orders = Order.objects.all()
+    def get_orders(params=None):
+        orders = Orders.objects.all()
         data_serializer = []
         for order in orders:
             data_serializer.append({
@@ -131,8 +128,7 @@ class Order(models.Model):
                 "customer_last_name": order.customer_id.last_name,
                 "customer_first_name": order.customer_id.first_name,
                 "customer_patronymic": order.customer_id.patronymic,
-                "products": order.products,
+                #"products": order.products,
                 "date_time": order.date_time.strftime('%H:%M %Y.%m.%d')
             })
-        print(data_serializer)
         return data_serializer

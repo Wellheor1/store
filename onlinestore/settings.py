@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp',
+    'store',
     'corsheaders',
     'rest_framework'
 ]
@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'onlinestore.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'onlinestore',
+        'NAME': 'store',
         'USER': 'postgres',
         'PASSWORD': '12345',
         'HOST': '127.0.0.1',

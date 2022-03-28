@@ -15,27 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-# from myapp.views import CustomerView
-# from myapp.views import ProductView
-# from myapp.views import TypeView
-# from myapp.views import ModelView
-# from myapp.views import ManufacturerView
-# from myapp.views import OrderView
-
-
-from rest_framework.routers import SimpleRouter
-
-#router = SimpleRouter()
-#router.register('api/customer', CustomerView)
-#router.register('api/product', ProductView)
-#router.register('api/type', TypeView)
-#router.register('api/model', ModelView)
-#router.register('api/manufacturer', ManufacturerView)
-#router.register('api/order', OrderView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('myapp.urls'))
+    path('', include('store.urls'))
 ]
 
 # urlpatterns += router.urls
