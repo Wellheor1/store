@@ -74,13 +74,13 @@ class Nomenclature(models.Model):
     def get_nomenclature(params=None):
         nomenclature = Nomenclature.objects.all()
         data_serializer = []
-        for nomenclatur in nomenclature:
+        for nomenclatu in nomenclature:
             data_serializer.append({
-                "id": nomenclatur.id,
-                "title": nomenclatur.title,
-                "manufacturer": nomenclatur.manufacturer.title,
-                "group": nomenclatur.group.title,
-                "description": nomenclatur.description
+                "id": nomenclatu.id,
+                "title": nomenclatu.title,
+                "manufacturer": nomenclatu.manufacturer.title,
+                "group": nomenclatu.group.title,
+                "description": nomenclatu.description
             })
         return data_serializer
 
@@ -101,11 +101,11 @@ class Products(models.Model):
             data_serializer.append({
                 "id": product.id,
                 "title": product.nomenclature.title,
-                "group": product.nomenclature.group,
-                "manufacturer": product.nomenclature.manufacturer,
+                "group": product.nomenclature.group.title,
+                "manufacturer": product.nomenclature.manufacturer.title,
                 "description": product.nomenclature.description,
                 "price": product.price,
-                "count": products.count
+                "count": product.count
             })
         return data_serializer
 
@@ -118,17 +118,17 @@ class Orders(models.Model):
     def __str__(self):
         return f'Номер заказа: {self.id}'
 
-    @staticmethod
-    def get_orders(params=None):
-        orders = Orders.objects.all()
-        data_serializer = []
-        for order in orders:
-            data_serializer.append({
-                "id": order.id,
-                "customer_last_name": order.customer_id.last_name,
-                "customer_first_name": order.customer_id.first_name,
-                "customer_patronymic": order.customer_id.patronymic,
-                #"products": order.products,
-                "date_time": order.date_time.strftime('%H:%M %Y.%m.%d')
-            })
-        return data_serializer
+
+def get_orders(params=None):
+    orders = Orders.objects.all()
+    data_serializer = []
+    for order in orders:
+        data_serializer.append({
+            "id": order.id,
+            "customer_last_name": order.client.last_name,
+            "customer_first_name": order.client.first_name,
+            "customer_patronymic": order.client.patronymic,
+            "products": [i.nomenclature.title for i in order.products.all()],
+            "date_time": order.date_time.strftime('%H:%M %Y.%m.%d')
+        })
+    return data_serializer

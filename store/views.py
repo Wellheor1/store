@@ -23,17 +23,17 @@ def get_manufacturers_list(request):
 
 @csrf_exempt
 def get_nomenclature_list(request):
-    data_serializer = Nomenclature.get_model()
+    data_serializer = Nomenclature.get_nomenclature()
     return JsonResponse({"data": data_serializer})
 
 
 @csrf_exempt
 def get_products_list(request):
-    data_serializer = Products.get_product()
+    data_serializer = Products.get_products()
     return JsonResponse({"data": data_serializer})
 
 
 @csrf_exempt
 def get_orders_list(request):
-    data_serializer = Orders.get_order()
+    data_serializer = get_orders_list
     return JsonResponse({"data": data_serializer})
