@@ -5,7 +5,7 @@
         <h1 class="text--secondary mb-3">Мои Товары</h1>
         <v-card
           class="elevation-10 mb-2"
-          v-for="(product, i) in products"
+          v-for="(product, i) in myProducts"
           :key="i"
         >
           <v-layout>
@@ -26,36 +26,14 @@
         </v-card>
       </v-flex>
     </v-layout>
-    <v-btn color="primary" @click="refreshData">Привет</v-btn>
   </v-container>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
-  data () {
-    return {
-      products: []
-    }
-  },
-  methods: {
-    refreshData () {
-      axios.get('http://127.0.0.1:8000/product')
-        .then((response) => {
-          this.products = response.data
-        })
-    }
-  },
   computed: {
     myProducts (state) {
       return this.$store.getters.myProducts
-    }
-  },
-  mounted () {
-    return {
-      refreshData () {
-      }
     }
   }
 }

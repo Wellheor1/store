@@ -40,14 +40,8 @@
 </template>
 
 <script>
-
 export default {
   props: ['id'],
-  data () {
-    return {
-      products: []
-    }
-  },
   computed: {
     product () {
       const id = this.id

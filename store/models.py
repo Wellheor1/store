@@ -128,9 +128,10 @@ class Orders(models.Model):
         for order in orders:
             data_serializer.append({
                 "id": order.id,
-                "customer_last_name": order.client.last_name,
-                "customer_first_name": order.client.first_name,
-                "customer_patronymic": order.client.patronymic,
+                "client_last_name": order.client.last_name,
+                "client_first_name": order.client.first_name,
+                "client_patronymic": order.client.patronymic,
+                "client_address": order.client.address,
                 "products": [
                     {
                         "id": i.nomenclature.id,

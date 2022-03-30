@@ -3,7 +3,6 @@ from store import views
 
 urlpatterns = [
     path('api/clients', views.get_clients_list),
-    path('api/clients/add', views.put_clients),
     path('api/groups', views.get_groups_list),
     path('api/manufacturers', views.get_manufacturers_list),
     path('api/nomenclature', views.get_nomenclature_list),
