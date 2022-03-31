@@ -9,12 +9,13 @@
             <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
-            label="Search"
+            label="Поиск"
             >
             </v-text-field>
             <v-spacer></v-spacer>
             <v-dialog
             v-model="dialog"
+            width="600"
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -31,73 +32,47 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-row>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
-                      >
                       <v-text-field
-                      v-model="editedItem.order_date"
-                      label="Дата заказа">
+                      v-model="editedItem.date_time"
+                      label="Дата заказа"
+                      clearable>
                       </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
-                      >
                       <v-text-field
                       v-model="editedItem.name_client"
                       label="Клиент"
+                      clearable
                       >
                       </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
-                      >
                       <v-text-field
-                      v-model="editedItem.address_client"
+                      v-model="editedItem.client_address"
                       label="Адрес клиента"
+                      clearable
                       >
                       </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
-                      >
                       <v-text-field
                       v-model="editedItem.product"
-                      label="Товары">
-                      </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
+                      label="Товары"
+                      clearable
                       >
+                      </v-text-field>
                       <v-text-field
                       v-model="editedItem.manufacturer"
-                      label="Производитель">
-                      </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
+                      label="Производитель"
+                      clearable
                       >
+                      </v-text-field>
                       <v-text-field
                       v-model="editedItem.price"
-                      label="Цена">
-                      </v-text-field>
-                      </v-col>
-                      <v-col cols="12"
-                      sm="6"
-                      md="4"
+                      label="Цена"
+                      clearable
                       >
+                      </v-text-field>
                       <v-text-field
                       v-model="editedItem.count"
-                      label="Количество">
+                      label="Количество"
+                      clearable
+                      >
                       </v-text-field>
-                      </v-col>
-                    </v-row>
                   </v-container>
                 </v-card-text>
                 <v-card-actions>
@@ -120,25 +95,58 @@
               </v-card>
             </v-dialog>
           </v-card-title>
-          <v-dialog v-model="dialogDelete">
-                <v-card>
-                  <v-card-title class="text-h5">Вы уверены что хотите удалить этот заказ?</v-card-title>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="closeDelete">Отменить</v-btn>
-                  <v-btn color="blue darken-1" text @click="deleteItemConfirm">Ок</v-btn>
-                  <v-spacer></v-spacer>
-                </v-card-actions>
-               </v-card>
+            <v-dialog v-model="dialogDelete" width="650">
+                  <v-card>
+                    <v-card-title class="text-h5">Вы уверены что хотите удалить этот заказ?</v-card-title>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDelete">Отменить</v-btn>
+                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">Ок</v-btn>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                 </v-card>
+              </v-dialog>
+           <v-dialog v-model="dialogDetail" width="600">
+            <v-card>
+              <v-card-title>
+                  <span class="text-h5">Детали заказа</span>
+                </v-card-title>
+              <v-card-actions>
+                <v-card-text>
+                  <v-text-field
+                disabled
+                v-model="editedItem.name_client"
+                  >
+                </v-text-field>
+                 <v-text-field
+                disabled
+                v-model="editedItem.client_address"
+                 >
+                </v-text-field>
+                 <v-text-field
+                v-model="editedItem.date_time"
+                disabled
+                 >
+                </v-text-field>
+                </v-card-text>
+              </v-card-actions>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="blue darken-1"
+                  text
+                  @click="closeDetail"
+                >
+                  Отмена
+                </v-btn>
+              </v-card-actions>
+             </v-card>
             </v-dialog>
             <v-data-table
           :headers="headers"
-          :items="order"
+          :items="orders[`data`]"
           :items-per-page="5"
           multi-sort
-          :expanded.sync="expanded"
-          item-key="id"
-          show-expand
           class="elevation-1"
           :search="search">
               <template v-slot:[`item.actions`]="{ item }">
@@ -151,15 +159,17 @@
                 </v-icon>
                 <v-icon
                   small
+                  class="mr-2"
                   @click="deleteItem(item)"
                 >
                   mdi-delete
                 </v-icon>
-              </template>
-              <template v-slot:expanded-item="{ headers, item }">
-                <td :colspan="headers.length">
-                  More info about {{ item.id }}
-                </td>
+                <v-icon
+                small
+                @click="orderDetail(item)"
+                >
+                  mdi-eye
+                </v-icon>
               </template>
             </v-data-table>
         </v-card>
@@ -174,44 +184,42 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      expanded: [],
-      singleExpand: false,
       search: '',
       dialog: false,
       dialogDelete: false,
+      dialogDetail: false,
       headers: [
         { text: 'Номер заказа', value: 'id' },
-        { text: 'Дата заказа', value: 'order_date' },
+        { text: 'Дата заказа', value: 'date_time' },
         { text: 'Клиент', value: 'name_client' },
-        { text: 'Адрес клиента ', value: 'address_client' },
-        { text: 'Товары', value: 'product' },
+        { text: 'Адрес клиента ', value: 'client_address' },
+        { text: 'Товары', value: 'products' },
         { text: 'Производитель', value: 'manufacturer' },
         { text: 'Цена', value: 'price' },
         { text: 'Количество', value: 'count' },
         { text: 'Действия', value: 'actions', sortable: false }
       ],
-      order: [],
       editedIndex: -1,
       editedItem: {
-        order_date: '',
+        date_time: '',
         name_client: '',
-        address_client: '',
-        product: '',
+        client_address: '',
+        products: '',
         manufacturer: '',
         price: '',
         count: ''
       },
       defaultItem: {
-        order_date: '',
+        date_time: '',
         name_client: '',
-        address_client: '',
-        product: '',
+        client_address: '',
+        products: '',
         manufacturer: '',
         price: '',
         count: ''
       },
-      orders: [
-      ]
+      orders: {
+      }
     }
   },
   methods: {
@@ -222,46 +230,34 @@ export default {
           console.log(this.orders)
         })
     },
-    initialize () {
-      this.order = [
-        {
-          id: 1,
-          order_date: '30.03.2022',
-          name_client: 'Антонюк Глеб Родинович',
-          address_client: 'Советская 57',
-          product: 'Ноутбук Lenovo Y250 S7',
-          manufacturer: 'Lenovo',
-          price: 3501,
-          count: '10'
-        },
-        {
-          id: 2,
-          order_date: '30.03.2021',
-          name_client: 'Антонюк Глеб Родинович3',
-          address_client: 'Советская 58',
-          product: 'Ноутбук Lenovo Y250 S8',
-          manufacturer: 'Lenovo',
-          price: 3503,
-          count: '5'
-        }
-      ]
-    },
     editItem (item) {
-      this.editedIndex = this.order.indexOf(item)
+      this.editedIndex = this.orders.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
     deleteItem (item) {
-      this.editedIndex = this.order.indexOf(item)
+      this.editedIndex = this.orders.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
     },
+    orderDetail (item) {
+      this.editedIndex = this.orders.data.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogDetail = true
+    },
     deleteItemConfirm () {
-      this.order.splice(this.editedIndex, 1)
+      this.orders.data.splice(this.editedIndex, 1)
       this.closeDelete()
     },
     close () {
       this.dialog = false
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
+    },
+    closeDetail () {
+      this.dialogDetail = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
@@ -276,16 +272,16 @@ export default {
     },
     save () {
       if (this.editedIndex > -1) {
-        Object.assign(this.order[this.editedIndex], this.editedItem)
+        Object.assign(this.orders[this.editedIndex], this.editedItem)
       } else {
-        this.order.push(this.editedItem)
+        this.orders.push(this.editedItem)
       }
       this.close()
     }
   },
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+      return this.editedIndex === -1 ? 'Новый заказ' : 'Редактирование заказа'
     }
   },
   watch: {
@@ -296,8 +292,8 @@ export default {
       val || this.closeDelete()
     }
   },
-  created () {
-    this.initialize()
+  mounted () {
+    this.get_orders()
   }
 }
 </script>
