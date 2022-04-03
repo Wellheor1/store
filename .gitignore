@@ -2,4 +2,3 @@ __pycache__/
 *.py[cod]
 .idea/
 *.pyc
-main.py
