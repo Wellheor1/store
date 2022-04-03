@@ -46,11 +46,11 @@ export default {
     return {
       drawer: null,
       links: [
-        { title: 'Авторизация', icon: 'mdi-account-box', url: '/login' },
-        { title: 'Регистрация', icon: 'mdi-face-man', url: '/register' },
-        { title: 'Заказы', icon: 'mdi-cart', url: '/checkout' },
-        { title: 'Новый товар', icon: 'mdi-plus', url: '/new' },
-        { title: 'Товар', icon: 'mdi-format-list-bulleted', url: '/list' }
+        { title: 'Вход', icon: 'mdi-account-box', url: '/login' },
+        // { title: 'Регистрация', icon: 'mdi-face-man', url: '/register' },
+        { title: 'Заказы', icon: 'mdi-cart', url: '/orders' },
+        { title: 'Клиенты', icon: 'mdi-account', url: '/clients' },
+        { title: 'Товары', icon: 'mdi-format-list-bulleted', url: '/products' }
       ]
     }
   }

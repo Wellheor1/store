@@ -114,15 +114,34 @@
               :headers="headersDetail"
               :items-per-page="10"
               :items="currentProducts['product']"
+              :footer-props="{
+                'items-per-page-text':'Товаров на странице:'
+              }"
               >
-                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon
-                small
-                class="mr-2"
-                @click="editItem(item)"
-                >
-                  mdi-pencil
-                </v-icon>
+                <template v-slot:[`item.count`]="props">
+                  <v-edit-dialog
+                    :return-value.sync="props.item.count"
+                    @save="save"
+                    @cancel="cancel"
+                    @open="open"
+                    @close="close1"
+                    large
+                    save-text="Сохранить"
+                    cancel-text="Отмена"
+                  >
+                    {{ props.item.count }}
+                    <template v-slot:input>
+                      <v-text-field
+                        v-model="props.item.count"
+                        :rules="[max25chars]"
+                        label="Edit"
+                        single-line
+                        counter
+                      ></v-text-field>
+                    </template>
+                  </v-edit-dialog>
+                </template>
+                <template v-slot:[`item.actions`]="{ item }">
                 <v-icon
                   small
                   class="mr-2"
@@ -130,10 +149,16 @@
                 >
                   mdi-delete
                 </v-icon>
-              </template>
+                </template>
               </v-data-table>
               <v-card-actions>
                 <v-spacer></v-spacer>
+                <v-btn
+                color="blue darken-1"
+                text
+                @click="closeDetail"
+                >Добавить товар
+                </v-btn>
                 <v-btn
                   color="blue darken-1"
                   text
@@ -150,7 +175,11 @@
           :items-per-page="5"
           multi-sort
           class="elevation-1"
-          :search="search">
+          :search="search"
+          :footer-props="{
+            'items-per-page-text':'Заказов на странице:'
+          }"
+            >
               <template v-slot:[`item.actions`]="{ item }">
                 <v-icon
                   small
@@ -185,9 +214,10 @@ export default {
       dialogDelete: false,
       dialogDetail: false,
       currentItem: '',
-      currentProducts: [],
+      currentProducts: {},
       orders: {},
       selection: [],
+      max25chars: v => v.length <= 25 || 'Input too long!',
       itemsArray: [
         {
           id: 1,
@@ -224,8 +254,8 @@ export default {
       editedItem: {
         title: '',
         manufacturer: '',
-        price: '',
-        count: ''
+        count: '',
+        price: ''
       },
       defaultItem: {
         date_time: '',
@@ -269,9 +299,9 @@ export default {
       this.dialogDelete = true
     },
     deleteCurrentProduct (item) {
-      this.editedIndex = this.orders.indexOf(item)
+      this.editedIndex = this.currentProducts.product.indexOf(item)
       this.editedItem = Object.assign({}, item)
-      this.dialogDelete = true
+      this.currentProducts.product.splice(this.editedIndex, 1)
     },
     deleteItemConfirm () {
       this.orders.data.splice(this.editedIndex, 1)
@@ -305,7 +335,11 @@ export default {
         this.orders.push(this.editedItem)
       }
       this.close()
-    }
+    },
+    save () {},
+    cancel () {},
+    open () {},
+    close1 () {}
   },
   computed: {
     formTitle () {
