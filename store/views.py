@@ -62,23 +62,54 @@ def get_current_products(request):
 def get_product_tree(request):
     product_data = Products.objects.all()
     id = 1
-    data = []
-    for product in product_data:
-        data.append({
-            "id": id,
-            "name": product.nomenclature.group.title,
+    prev_group_pk = None
+    result = []
+    tmp_group = {
+            "id": "",
+            "name": "",
             "children": [
                 {
-                    "id": id + 1,
-                    "name": product.nomenclature.manufacturer.title,
+                    "id": "",
+                    "name": "",
                     "children": [
                         {
-                            "id": id + 2,
-                            "name": product.nomenclature.title
+                            "id": "",
+                            "name": ""
                         }
                     ]
                 }
             ]
-        })
-        id += 3
-    return JsonResponse(data, safe=False)
+        }
+
+    step = 0
+    for product in product_data:
+        groups_pks = [k["id"] for k in result]
+        if product.nomenclature.group.pk not in groups_pks:
+            if step != 0:
+                result.append(tmp_group.copy())
+            tmp_group["id"] = product.nomenclature.group.pk
+            tmp_group["name"] = product.nomenclature.group.title
+            tmp_group["children"] = [
+                        {
+                            "id": product.nomenclature.manufacturer.pk,
+                            "name": product.nomenclature.manufacturer.title
+                        }
+                    ]
+
+        tmp_children_general = tmp_group["children"]
+        manufacture_pks = [k["id"] for k in tmp_children_general]
+        if product.nomenclature.manufacturer.pk not in manufacture_pks:
+            tmp_children_slave = {}
+            tmp_children_slave["id"] = product.nomenclature.manufacturer.pk
+            tmp_children_slave["name"] = product.nomenclature.manufacturer.title
+            tmp_children_general.append(tmp_children_skave.copy())
+
+        tmp_group["children"] = tmp_children_general.copy()
+        prev_group_pk = product.nomenclature.group.pk
+        step += 1
+ 
+    result.append(tmp_group.copy())
+    for i in result:
+        print(i)
+
+    return JsonResponse(result, safe=False)
