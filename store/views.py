@@ -57,26 +57,28 @@ def get_current_products(request):
     }
     return JsonResponse(data)
 
+
 @csrf_exempt
-def get_order_add(request):
+def get_product_tree(request):
     product_data = Products.objects.all()
-    data_serializer = []
+    id = 1
+    data = []
     for product in product_data:
-        data_serializer.append(
-            {
-                
-            }
-        )
-            # "children": [
-            #     {
-            #         "id": product.nomenclature.manufacturer.id,
-            #         "name": product.nomenclature.manufacturer.title,
-            #         "Children": [
-            #             {
-            #                 "id": product.nomenclature.id,
-            #                 "name": product.nomenclature.title
-            #             }
-            #         ]
-            #     }
-            # ]
-    return JsonResponse(data_serializer, safe=False)
+        data.append({
+            "id": id,
+            "name": product.nomenclature.group.title,
+            "children": [
+                {
+                    "id": id + 1,
+                    "name": product.nomenclature.manufacturer.title,
+                    "children": [
+                        {
+                            "id": id + 2,
+                            "name": product.nomenclature.title
+                        }
+                    ]
+                }
+            ]
+        })
+        id += 3
+    return JsonResponse(data, safe=False)

@@ -22,7 +22,7 @@
                 color="primary"
                 dark
                 v-bind="attrs"
-                @click="orderAdd"
+                @click="addOrder"
                 >
                   Добавить заказ</v-btn>
               </template>
@@ -32,12 +32,15 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
+                    <v-select
+                    :items="clients"
+                    label="Клиенты">
+                    </v-select>
                     <v-treeview
                     v-model="selection"
-                    :items="itemsArray"
+                    :selection-type="selectionType"
+                    :items="productsTree"
                     selectable
-                    return-object
-                    open-all
                     ></v-treeview>
                   </v-container>
                 </v-card-text>
@@ -217,25 +220,10 @@ export default {
       currentProducts: {},
       orders: {},
       selection: [],
+      selectionType: 'leaf',
       max25chars: v => v.length <= 25 || 'Input too long!',
-      itemsArray: [
-        {
-          id: 1,
-          name: 'Root',
-          children: [
-            { id: 2, name: 'child 1' },
-            { id: 3, name: 'child 2' },
-            {
-              id: 4,
-              name: 'child 3',
-              children: [
-                { id: 5, name: 'Grandchild #1' },
-                { id: 6, name: 'Grandchild #2' }
-              ]
-            }
-          ]
-        }
-      ],
+      productsTree: [],
+      clients: [],
       headers: [
         { text: 'Номер заказа', value: 'id' },
         { text: 'Дата заказа', value: 'date_time' },
@@ -282,11 +270,16 @@ export default {
         })
       this.dialogDetail = true
     },
-    orderAdd () {
-      axios.get('http://localhost:8000/api/order-add')
+    addOrder () {
+      axios.get('http://localhost:8000/api/clients')
         .then((response) => {
-          this.itemsArray = response.data
+          this.clients = response.data
         })
+      axios.get('http://localhost:8000/api/products-tree')
+        .then((response) => {
+          this.productsTree = response.data
+        })
+      this.dialogAdd = true
     },
     editItem (item) {
       this.editedIndex = this.orders.data.indexOf(item)
@@ -340,11 +333,6 @@ export default {
     cancel () {},
     open () {},
     close1 () {}
-  },
-  computed: {
-    formTitle () {
-      return this.editedIndex === -1 ? 'Новый заказ' : 'Редактирование заказа'
-    }
   },
   watch: {
     dialogAdd (val) {

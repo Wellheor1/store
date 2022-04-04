@@ -24,9 +24,6 @@ class Clients(models.Model):
             })
         return data_serializer
 
-    # @staticmethod
-    # def put_clients(params=None):
-
 
 class Groups(models.Model):
     title = models.CharField(max_length=255)
@@ -129,15 +126,6 @@ class Orders(models.Model):
                 "id": order.id,
                 "name_client": order.client.__str__(),
                 "client_address": order.client.address,
-                "products": [
-                    {
-                        "id": i.nomenclature.id,
-                        "title": i.nomenclature.title,
-                        "manufacturer": i.nomenclature.manufacturer.title,
-                        "group": i.nomenclature.group.title,
-                        "price": i.price,
-                        "count": i.count
-                    } for i in order.products.all()],
                 "date_time": order.date_time.strftime('%H:%M %Y.%m.%d'),
             })
         return data_serializer
