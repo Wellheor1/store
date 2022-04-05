@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-card>
+        <v-card class="mb-2 elevation-5">
           <v-card-title>
             Товары
             <v-spacer></v-spacer>
@@ -36,7 +36,7 @@
                <template v-slot:[`item.actions`]="{ item }">
                  <v-btn
                    small
-                   color="primary"
+                   color="success"
                    @click="addProductToOrder(item)"
                  >Добавить в заказ</v-btn>
               </template>
@@ -58,7 +58,7 @@
     </v-row>
     <v-row>
       <v-col>
-        <v-card>
+        <v-card class="elevation-5">
           <v-card-title>
             Товары в корзине
             <v-spacer></v-spacer>
@@ -86,6 +86,7 @@
             @click="addClientToOrder"
             label="Поиск клиента"
             :items="clients"
+            v-model="selectClient"
           >
             </v-autocomplete>
               <v-btn
@@ -113,6 +114,7 @@ export default {
       alertIncludeCart: false,
       clients: [],
       orderData: [],
+      selectClient: null,
       headers: [
         { text: 'Номер товара', value: 'id' },
         { text: 'Название', value: 'title' },
@@ -152,7 +154,7 @@ export default {
         })
     },
     toOrder () {
-      axios.post('http://localhost:8000/api/add-order', { Products: this.productsCart, Clients: this.clients })
+      axios.post('http://localhost:8000/api/add-order', { Products: this.productsCart, Clients: this.selectClient })
     }
   },
   mounted () {
