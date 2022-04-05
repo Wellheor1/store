@@ -113,7 +113,7 @@ class Products(models.Model):
 class Orders(models.Model):
     client = models.ForeignKey(Clients, on_delete=models.CASCADE)
     products = models.ManyToManyField(Products)
-    date_time = models.DateTimeField()
+    date_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Номер заказа: {self.id}'

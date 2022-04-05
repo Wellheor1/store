@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/products', views.get_products_list),
     path('api/orders', views.get_orders_list),
     path('api/current-product', views.get_current_products),
-    path('api/products-tree', views.get_product_tree),
+    path('api/clients-name', views.get_clients_name),
+    path('api/add-order', views.add_order)
 ]

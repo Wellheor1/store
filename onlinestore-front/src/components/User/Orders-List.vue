@@ -32,14 +32,22 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-select
+                    <v-autocomplete
+                      label="Поиск клиента"
                     :items="clients"
-                    label="Клиенты">
-                    </v-select>
+                    ></v-autocomplete>
+                  </v-container>
+                  <v-container>
+                    <v-text-field
+                    v-model="searchTree"
+                    label="Поиск товара"
+                    clearable
+                    ></v-text-field>
                     <v-treeview
                     v-model="selection"
                     :selection-type="selectionType"
                     :items="productsTree"
+                    :search="searchTree"
                     selectable
                     ></v-treeview>
                   </v-container>
@@ -212,6 +220,8 @@ export default {
   data () {
     return {
       search: '',
+      searchTree: null,
+      searchClients: '',
       dialogAdd: false,
       dialogEdit: false,
       dialogDelete: false,
@@ -271,7 +281,7 @@ export default {
       this.dialogDetail = true
     },
     addOrder () {
-      axios.get('http://localhost:8000/api/clients')
+      axios.get('http://localhost:8000/api/clients-select')
         .then((response) => {
           this.clients = response.data
         })
