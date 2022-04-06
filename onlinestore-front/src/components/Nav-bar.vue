@@ -20,7 +20,7 @@
           :to="'/'"
           tag="span"
           class="pointer"
-        >Онлайн магазин</router-link>
+        >ИС "Магазин"</router-link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items app class="hidden-sm-and-down">

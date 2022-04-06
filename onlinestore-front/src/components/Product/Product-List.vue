@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-card class="mb-2 elevation-5">
+        <v-card class="mb-2 elevation-7">
           <v-card-title>
             Товары
             <v-spacer></v-spacer>
@@ -29,6 +29,7 @@
               :items-per-page="5"
               :items="products[`data`]"
               multi-sort
+              :search="search"
               :footer-props="{
                 'items-per-page-text':'Товаров на странице:'
               }"
@@ -38,7 +39,7 @@
                    small
                    color="success"
                    @click="addProductToOrder(item)"
-                 >Добавить в заказ</v-btn>
+                 ><v-icon small>mdi-basket-plus-outline</v-icon></v-btn>
               </template>
               </v-data-table>
           <v-row justify="center">
@@ -58,27 +59,36 @@
     </v-row>
     <v-row>
       <v-col>
-        <v-card class="elevation-5">
+        <v-card class="elevation-7">
           <v-card-title>
-            Товары в корзине
+            Корзина
             <v-spacer></v-spacer>
             <v-text-field
-            v-model="search"
+            v-model="searchCart"
             append-icon="mdi-magnify"
             label="Поиск"
             >
             </v-text-field>
-            <v-spacer></v-spacer>
+            <v-spacer class="ma-16"></v-spacer>
           </v-card-title>
              <v-data-table
               :headers="headersCart"
               :items-per-page="5"
               :items="productsCart"
               multi-sort
+              :search="searchCart"
               :footer-props="{
                 'items-per-page-text':'Товаров на странице:'
               }"
-              >
+              ><template v-slot:[`item.actions`]="{ item }">
+                <v-icon
+                  small
+                  class="mr-2"
+                  @click="deleteCurrentProductInCurt(item)"
+                >
+                  mdi-delete
+                </v-icon>
+                </template>
               </v-data-table>
           <v-row justify="center">
             <v-col cols="12" xs="12" sm="6" md="4">
@@ -86,6 +96,9 @@
             @click="addClientToOrder"
             label="Поиск клиента"
             :items="clients"
+            item-text="name"
+            item-value="id"
+            return-object
             v-model="selectClient"
           >
             </v-autocomplete>
@@ -108,10 +121,12 @@ export default {
   data () {
     return {
       search: '',
+      searchCart: '',
       products: [],
       productsCart: [],
       currentProductId: [],
       alertIncludeCart: false,
+      deleteIndex: '',
       clients: [],
       orderData: [],
       selectClient: null,
@@ -122,7 +137,7 @@ export default {
         { text: 'Категория', value: 'group' },
         { text: 'Количество', value: 'count' },
         { text: 'Цена за шт', value: 'price' },
-        { text: 'Действия', value: 'actions' }
+        { text: 'Действия', value: 'actions', sortable: false }
       ],
       headersCart: [
         { text: 'Номер товара', value: 'id' },
@@ -130,7 +145,8 @@ export default {
         { text: 'Производитель', value: 'manufacturer' },
         { text: 'Категория', value: 'group' },
         { text: 'Количество', value: 'count' },
-        { text: 'Цена', value: 'price' }
+        { text: 'Цена', value: 'price' },
+        { text: 'Действия', value: 'actions', sortable: false }
       ]
     }
   },
@@ -154,7 +170,11 @@ export default {
         })
     },
     toOrder () {
-      axios.post('http://localhost:8000/api/add-order', { Products: this.productsCart, Clients: this.selectClient })
+      axios.post('http://localhost:8000/api/add-order', { Products: this.productsCart, Client: this.selectClient.id })
+    },
+    deleteCurrentProductInCurt (item) {
+      this.productsCart.splice(this.productsCart.indexOf(item), 1)
+      this.currentProductId.splice(this.currentProductId.indexOf(item), 1)
     }
   },
   mounted () {

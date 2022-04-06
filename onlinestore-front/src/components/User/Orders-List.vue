@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col>
-        <v-card>
+        <v-card class="elevation-7">
           <v-card-title>
             Заказы
             <v-spacer></v-spacer>
@@ -145,7 +145,7 @@
                       <v-text-field
                         v-model="props.item.count"
                         :rules="[max25chars]"
-                        label="Edit"
+                        label="Редактирование"
                         single-line
                         counter
                       ></v-text-field>
@@ -185,7 +185,6 @@
           :items="orders[`data`]"
           :items-per-page="5"
           multi-sort
-          class="elevation-1"
           :search="search"
           :footer-props="{
             'items-per-page-text':'Заказов на странице:'

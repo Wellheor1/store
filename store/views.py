@@ -61,12 +61,20 @@ def get_current_products(request):
 @csrf_exempt
 def get_clients_name(request):
     client_data = Clients.objects.all()
+    data = []
     for client in client_data:
-        data = [f"{client.last_name} {client.first_name} {client.patronymic}"]
+        data.append({"name":client.__str__(), "id": client.id})
     return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def add_order(request):
+    product = []
     request_data = json.loads(request.body)
-    print(request_data)
+    for i in request_data["Products"]:
+        product.append(Products.objects.get(pk=i["id"]))
+    client = Clients.objects.get(pk=request_data["Client"])
+    # order = Orders.objects.create()
+    # order.client.add(client)
+    # order.products.add(product)
+    print(client)
     return JsonResponse('Успешное создание заказа', safe=False)
