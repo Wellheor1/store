@@ -19,7 +19,7 @@ def get_groups_list(request):
 
 @csrf_exempt
 def get_manufacturers_list(request):
-    data_serializer = Manufacturers.get_manufacturer()
+    data_serializer = Manufacturers.get_manufacturers()
     return JsonResponse({"data": data_serializer})
 
 
@@ -44,7 +44,7 @@ def get_orders_list(request):
 @csrf_exempt
 def get_current_products(request):
     request_data = json.loads(request.body)
-    current_products = Orders.objects.get(id=request_data["pk"])
+    current_products = Orders.objects.get(pk=request_data["pk"])
     data = {
         "product": [{
             "id": i.nomenclature.id,
@@ -61,20 +61,40 @@ def get_current_products(request):
 @csrf_exempt
 def get_clients_name(request):
     client_data = Clients.objects.all()
-    data = []
-    for client in client_data:
-        data.append({"name":client.__str__(), "id": client.id})
+    data = [{"name": client.__str__(), "id": client.id} for client in client_data]
     return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def add_order(request):
-    product = []
     request_data = json.loads(request.body)
-    for i in request_data["Products"]:
-        product.append(Products.objects.get(pk=i["id"]))
-    client = Clients.objects.get(pk=request_data["Client"])
-    # order = Orders.objects.create()
-    # order.client.add(client)
-    # order.products.add(product)
-    print(client)
+    products = [Products.objects.get(pk=data["id"]) for data in request_data["products"]]
+    print(products)
+    order = Orders.objects.create(client=Clients.objects.get(pk=request_data["client"]))
+    #order.products.set(products)
+    #order.save()
     return JsonResponse('Успешное создание заказа', safe=False)
+
+
+@csrf_exempt
+def add_client(request):
+    request_data = json.loads(request.body)
+    print(request_data)
+    client = Clients(last_name=request_data["lastName"], first_name=request_data["firstName"],
+                     patronymic=request_data["patronymic"], address=request_data["address"])
+    client.save()
+    return JsonResponse('Успешное добавление клиента', safe=False)
+
+
+@csrf_exempt
+def add_nomenclature(request):
+    request_data = json.loads(request.body)
+    print(request_data)
+    nomenclature = Nomenclature(title=request_data["title"],
+                                manufacturer=Manufacturers.objects.get(pk=request_data["manufacturer"]),
+                                group=Groups.objects.get(pk=request_data["group"]),
+                                description=request_data["description"],
+                                price=request_data["price"],
+                                count=request_data["count"])
+    nomenclature.save()
+    return JsonResponse('Успешное добавление товара', safe=False)

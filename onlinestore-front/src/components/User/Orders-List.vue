@@ -13,98 +13,38 @@
             >
             </v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog
-            v-model="dialogAdd"
-            width="600"
-            >
-              <template v-slot:activator="{ attrs }">
-                <v-btn
-                color="primary"
-                dark
-                v-bind="attrs"
-                @click="addOrder"
-                >
-                  Добавить заказ</v-btn>
-              </template>
+            <v-dialog v-model="dialogAdd" width="600">
               <v-card>
                 <v-card-title>
                   <span class="text-h5">Новый заказ</span>
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-autocomplete
-                      label="Поиск клиента"
-                    :items="clients"
-                    ></v-autocomplete>
-                  </v-container>
-                  <v-container>
-                    <v-text-field
-                    v-model="searchTree"
-                    label="Поиск товара"
-                    clearable
-                    ></v-text-field>
-                    <v-treeview
-                    v-model="selection"
-                    :selection-type="selectionType"
-                    :items="productsTree"
-                    :search="searchTree"
-                    selectable
-                    ></v-treeview>
+                    <v-autocomplete label="Поиск клиента" :items="clients"></v-autocomplete>
                   </v-container>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-                  >
-                    Отмена
-                  </v-btn>
-                   <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="saveAdd"
-                  >
-                     Сохранить
-                   </v-btn>
+                  <v-btn color="blue darken-1" text @click="close">Отмена</v-btn>
+                   <v-btn color="blue darken-1" text @click="saveAdd">Сохранить</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
           </v-card-title>
-          <v-dialog
-            v-model="dialogEdit"
-            width="600"
-            >
+          <v-dialog v-model="dialogEdit" width="600">
               <v-card>
                 <v-card-title>
                   <span class="text-h5">Редактирование заказа</span>
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                      <v-text-field
-                      v-model="editedItem.title"
-                      label="Название товара"
-                      clearable>
-                      </v-text-field>
+                      <v-text-field v-model="editedItem.title" label="Название товара" clearable></v-text-field>
                   </v-container>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="close"
-                  >
-                    Отмена
-                  </v-btn>
-                   <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="saveAdd"
-                  >
-                     Сохранить
-                   </v-btn>
+                  <v-btn color="blue darken-1" text @click="close">Отмена</v-btn>
+                   <v-btn color="blue darken-1" text @click="saveAdd">Сохранить</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -121,14 +61,10 @@
               </v-dialog>
            <v-dialog v-model="dialogDetail" width="600">
             <v-card>
-              <v-data-table
-              :headers="headersDetail"
-              :items-per-page="10"
-              :items="currentProducts['product']"
-              :footer-props="{
+              <v-data-table :headers="headersDetail" :items-per-page="10" :items="currentProducts['product']"
+                            :footer-props="{
                 'items-per-page-text':'Товаров на странице:'
-              }"
-              >
+              }">
                 <template v-slot:[`item.count`]="props">
                   <v-edit-dialog
                     :return-value.sync="props.item.count"
@@ -237,7 +173,8 @@ export default {
         { text: 'Номер заказа', value: 'id' },
         { text: 'Дата заказа', value: 'date_time' },
         { text: 'Клиент', value: 'name_client' },
-        { text: 'Адрес клиента ', value: 'client_address' },
+        { text: 'Адрес клиента', value: 'client_address' },
+        { text: 'Статус', value: 'status' },
         { text: 'Действия', value: 'actions', sortable: false }
       ],
       headersDetail: [
