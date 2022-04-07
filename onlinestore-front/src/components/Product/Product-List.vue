@@ -8,7 +8,7 @@
             <v-spacer></v-spacer>
             <v-text-field v-model="search" append-icon="mdi-magnify" label="Поиск"></v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog v-model="dialogAddProduct" width="600">
+            <v-dialog v-model="dialogAddProduct" width="400">
               <template v-slot:activator="{ attrs }">
                 <v-btn color="primary" dark v-bind="attrs" @click="callDialogAddProduct">Добавить товар</v-btn>
               </template>
@@ -18,20 +18,29 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-text-field label="Название" v-model="dataNewProduct.title" required></v-text-field>
-                    <v-autocomplete label="Производитель" @click="loadManufacturer" v-model="dataNewProduct.manufacturer"
-                                    required :items="manufacturers.data" item-text="title" item-value="id"></v-autocomplete>
-                    <v-autocomplete label="Категория" @click="loadGroups" v-model="dataNewProduct.group"
-                                    required :items="groups.data" item-text="title" item-value="id"></v-autocomplete>
-                    <v-text-field label="Описание" v-model="dataNewProduct.description" required></v-text-field>
-                    <v-text-field type="number" min="0" label="Количество" v-model="dataNewProduct.count" required></v-text-field>
-                    <v-text-field suffix="Руб" min="0"  type="number" label="Цена за шт" v-model="dataNewProduct.price" required></v-text-field>
+                    <v-form ref="form" v-model="valid" lazy-validation>
+                      <v-text-field :rules="newProductRules" label="Название" v-model="dataNewProduct.title" required>
+                      </v-text-field>
+                      <v-autocomplete :rules="newProductRules" label="Производитель" @click="loadManufacturer"
+                                      v-model="dataNewProduct.manufacturer"
+                                      required :items="manufacturers.data" item-text="title" item-value="id">
+                      </v-autocomplete>
+                      <v-autocomplete :rules="newProductRules" label="Категория" @click="loadGroups"
+                                      v-model="dataNewProduct.group" required :items="groups.data"
+                                      item-text="title" item-value="id">
+                      </v-autocomplete>
+                      <v-text-field :rules="newProductRules" label="Описание" v-model="dataNewProduct.description" required></v-text-field>
+                      <v-text-field :rules="newProductRules" type="number" min="0" label="Количество" v-model="dataNewProduct.count" required>
+                      </v-text-field>
+                      <v-text-field :rules="newProductRules" suffix="Руб" min="0"  type="number" label="Цена за шт"
+                                    v-model="dataNewProduct.price" required></v-text-field>
+                    </v-form>
                   </v-container>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="blue darken-1" text @click="closeDialogAddProduct">Отмена</v-btn>
-                  <v-btn color="blue darken-1" text @click="saveNewProduct">Сохранить</v-btn>
+                  <v-btn color="blue darken-1" text @click="saveNewProduct" :disabled="!valid">Сохранить</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -132,7 +141,11 @@ export default {
         description: ''
       },
       groups: [],
-      manufacturers: []
+      manufacturers: [],
+      newProductRules: [
+        v => !!v || 'Обязательное поле'
+      ],
+      valid: false
     }
   },
   methods: {
@@ -155,7 +168,8 @@ export default {
         })
     },
     toOrder () {
-      axios.post('http://localhost:8000/api/add-order', { products: this.productsCart, client: this.selectClient.id })
+      axios.post('http://localhost:8000/api/add-order',
+        { products: this.productsCart, client: this.selectClient.id })
     },
     deleteCurrentProductInCurt (item) {
       this.productsCart.splice(this.productsCart.indexOf(item), 1)
@@ -168,8 +182,10 @@ export default {
       this.dialogAddProduct = false
     },
     saveNewProduct () {
-      axios.post('http://localhost:8000/api/add-nomenclature', this.dataNewProduct)
-      this.dialogAddProduct = false
+      if (this.$refs.form.validate()) {
+        axios.post('http://localhost:8000/api/add-nomenclature', this.dataNewProduct)
+        this.dialogAddProduct = false
+      }
     },
     loadManufacturer () {
       axios.get('http://localhost:8000/api/manufacturers')

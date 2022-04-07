@@ -9,7 +9,7 @@
             <v-text-field v-model="search" append-icon="mdi-magnify" label="Поиск">
             </v-text-field>
             <v-spacer></v-spacer>
-             <v-dialog v-model="dialogAddClient" width="600">
+             <v-dialog v-model="dialogAddClient" width="400">
               <template v-slot:activator="{ attrs }">
                 <v-btn color="primary" dark v-bind="attrs" @click="callDialogAddClient">Добавить клиента</v-btn>
               </template>
@@ -19,16 +19,22 @@
                 </v-card-title>
                 <v-card-text>
                   <v-container>
-                    <v-text-field label="Фамилия" v-model="dataNewClient.lastName" required></v-text-field>
-                    <v-text-field label="Имя" v-model="dataNewClient.firstName" required></v-text-field>
-                    <v-text-field label="Отчество" v-model="dataNewClient.patronymic" required></v-text-field>
-                    <v-text-field label="Адрес" v-model="dataNewClient.address" required></v-text-field>
+                    <v-form ref="form" v-model="valid" lazy-validation>
+                      <v-text-field label="Фамилия" v-model="dataNewClient.lastName" :rules="newClientRules" required>
+                      </v-text-field>
+                      <v-text-field label="Имя" v-model="dataNewClient.firstName" :rules="newClientRules" required>
+                      </v-text-field>
+                      <v-text-field label="Отчество" v-model="dataNewClient.patronymic" :rules="newClientRules" required>
+                      </v-text-field>
+                      <v-text-field label="Адрес" v-model="dataNewClient.address" :rules="newClientRules" required>
+                      </v-text-field>
+                    </v-form>
                   </v-container>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="blue darken-1" text @click="closeDialogAddClient">Отмена</v-btn>
-                   <v-btn color="blue darken-1" text @click="saveNewClient">Сохранить</v-btn>
+                   <v-btn color="blue darken-1" :disabled="!valid" text @click="saveNewClient">Сохранить</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -63,6 +69,11 @@ export default {
         patronymic: '',
         address: ''
       },
+      newClientRules: [
+        v => !!v || 'Обязательное поле',
+        v => (v && v.length <= 19) || 'Не более 20 символов'
+      ],
+      valid: false,
       headers: [
         { text: 'Номер клиента', value: 'id' },
         { text: 'Фамилия', value: 'last_name' },
@@ -94,8 +105,10 @@ export default {
       this.dialogAddClient = false
     },
     saveNewClient () {
-      axios.post('http://localhost:8000/api/add-client', this.dataNewClient)
-      this.dialogAddClient = false
+      if (this.$refs.form.validate()) {
+        axios.post('http://localhost:8000/api/add-client', this.dataNewClient)
+        this.dialogAddClient = false
+      }
     }
   },
   mounted () {
