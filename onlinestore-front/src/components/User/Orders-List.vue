@@ -6,60 +6,32 @@
           <v-card-title>
             Заказы
             <v-spacer></v-spacer>
-            <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Поиск"
-            >
-            </v-text-field>
+            <v-text-field v-model="search" append-icon="mdi-magnify" label="Поиск"></v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog v-model="dialogAdd" width="600">
-              <v-card>
-                <v-card-title>
-                  <span class="text-h5">Новый заказ</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-container>
-                    <v-autocomplete label="Поиск клиента" :items="clients"></v-autocomplete>
-                  </v-container>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="close">Отмена</v-btn>
-                   <v-btn color="blue darken-1" text @click="saveAdd">Сохранить</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
           </v-card-title>
-          <v-dialog v-model="dialogEdit" width="600">
-              <v-card>
-                <v-card-title>
-                  <span class="text-h5">Редактирование заказа</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-container>
-                      <v-text-field v-model="editedItem.title" label="Название товара" clearable></v-text-field>
-                  </v-container>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="blue darken-1" text @click="close">Отмена</v-btn>
-                   <v-btn color="blue darken-1" text @click="saveAdd">Сохранить</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-            <v-dialog v-model="dialogDelete" width="650">
+          <v-dialog v-model="dialogCancelOrder" width="650">
                   <v-card>
-                    <v-card-title class="text-h5">Вы уверены что хотите удалить этот заказ?</v-card-title>
+                    <v-card-title class="text-h5">Вы уверены что хотите отменить этот заказ?</v-card-title>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="closeDelete">Отменить</v-btn>
-                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">Ок</v-btn>
+                    <v-btn color="blue darken-1" text @click="closeDialogCancel">Отменить</v-btn>
+                    <v-btn color="blue darken-1" text @click="cancelOrderConfirm">Ок</v-btn>
                     <v-spacer></v-spacer>
                   </v-card-actions>
                  </v-card>
-              </v-dialog>
-           <v-dialog v-model="dialogDetail" width="600">
+          </v-dialog>
+           <v-dialog v-model="dialogCompetedOrder" width="400">
+                  <v-card>
+                    <v-card-title class="text-h5">Заказ исполнен?</v-card-title>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDialogComleted">Отменить</v-btn>
+                    <v-btn color="blue darken-1" text @click="completedOrderConfirm">Ок</v-btn>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                 </v-card>
+          </v-dialog>
+          <v-dialog v-model="dialogDetail" width="600">
             <v-card>
               <v-data-table :headers="headersDetail" :items-per-page="10" :items="currentProducts['product']"
                             :footer-props="{
@@ -67,81 +39,38 @@
               }">
                 <template v-slot:[`item.count`]="props">
                   <v-edit-dialog
-                    :return-value.sync="props.item.count"
-                    @save="save"
-                    @cancel="cancel"
-                    @open="open"
-                    @close="close1"
-                    large
-                    save-text="Сохранить"
-                    cancel-text="Отмена"
-                  >
+                    :return-value.sync="props.item.count" @save="save" @cancel="cancel" @open="open" @close="close1"
+                    large save-text="Сохранить" cancel-text="Отмена">
                     {{ props.item.count }}
                     <template v-slot:input>
-                      <v-text-field
-                        v-model="props.item.count"
-                        :rules="[max25chars]"
-                        label="Редактирование"
-                        single-line
-                        counter
+                      <v-text-field v-model="props.item.count" :rules="[max25chars]" label="Редактирование" single-line
+                                    counter
                       ></v-text-field>
                     </template>
                   </v-edit-dialog>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
-                <v-icon
-                  small
-                  class="mr-2"
-                  @click="deleteCurrentProduct(item)"
-                >
-                  mdi-delete
-                </v-icon>
+                <v-icon small class="mr-2" @click="deleteCurrentProduct(item)">mdi-delete</v-icon>
                 </template>
               </v-data-table>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn
-                color="blue darken-1"
-                text
-                @click="closeDetail"
-                >Добавить товар
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  text
-                  @click="closeDetail"
-                >
-                  Отмена
-                </v-btn>
+                <v-btn color="blue darken-1" text @click="closeDetail">Добавить товар</v-btn>
+                <v-btn color="blue darken-1" text @click="closeDetail">Отмена</v-btn>
               </v-card-actions>
              </v-card>
-            </v-dialog>
-            <v-data-table
-          :headers="headers"
-          :items="orders[`data`]"
-          :items-per-page="5"
-          multi-sort
-          :search="search"
-          :footer-props="{
-            'items-per-page-text':'Заказов на странице:'
-          }"
-            >
+          </v-dialog>
+          <v-data-table :headers="headers" :items="orders[`data`]" :items-per-page="5" multi-sort :search="search"
+                        :sort-desc=true sort-by="id"
+                          :footer-props="{
+              'items-per-page-text':'Заказов на странице:'
+            }">
               <template v-slot:[`item.actions`]="{ item }">
-                <v-icon
-                  small
-                  class="mr-2"
-                  @click="deleteItem(item)"
-                >
-                  mdi-delete
-                </v-icon>
-                <v-icon
-                small
-                @click="loadCurrentProducts(item)"
-                >
-                  mdi-eye
-                </v-icon>
+                <v-icon small color="success" class="mr-2" @click="callDialogCompletedOrder(item)">mdi-check-bold</v-icon>
+                <v-icon small class="mr-2" @click="loadCurrentProducts(item)">mdi-eye</v-icon>
+                <v-icon small @click="callDialogCancelOrder(item)">mdi-delete</v-icon>
               </template>
-            </v-data-table>
+          </v-data-table>
         </v-card>
       </v-col>
     </v-row>
@@ -159,8 +88,9 @@ export default {
       searchClients: '',
       dialogAdd: false,
       dialogEdit: false,
-      dialogDelete: false,
+      dialogCancelOrder: false,
       dialogDetail: false,
+      dialogCompetedOrder: false,
       currentItem: '',
       currentProducts: {},
       orders: {},
@@ -184,6 +114,7 @@ export default {
         { text: 'Цена', value: 'price' },
         { text: 'Действия', value: 'actions', sortable: false }
       ],
+      dialogTitle: '',
       editedIndex: -1,
       editedItem: {
         title: '',
@@ -232,19 +163,26 @@ export default {
       this.editedItem = Object.assign({}, item)
       this.dialogEdit = true
     },
-    deleteItem (item) {
-      this.editedIndex = this.orders.data.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogDelete = true
+    callDialogCancelOrder (item) {
+      this.editedIndex = item.id
+      this.dialogCancelOrder = true
+    },
+    callDialogCompletedOrder (item) {
+      this.editedIndex = item.id
+      this.dialogCompetedOrder = true
     },
     deleteCurrentProduct (item) {
       this.editedIndex = this.currentProducts.product.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.currentProducts.product.splice(this.editedIndex, 1)
     },
-    deleteItemConfirm () {
-      this.orders.data.splice(this.editedIndex, 1)
-      this.closeDelete()
+    cancelOrderConfirm () {
+      axios.post('http://localhost:8000/api/cancel-order', { id: this.editedIndex, status: 'Отменён' })
+      this.dialogCancelOrder = false
+    },
+    completedOrderConfirm () {
+      axios.post('http://localhost:8000/api/completed-order', { id: this.editedIndex, status: 'Выполнен' })
+      this.dialogCompetedOrder = false
     },
     close () {
       this.dialogAdd = false
@@ -260,13 +198,17 @@ export default {
         this.editedIndex = -1
       })
     },
-    closeDelete () {
-      this.dialogDelete = false
+    closeDialogCancel () {
+      this.dialogCancelOrder = false
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
       })
     },
+    closeDialogComleted () {
+      this.dialogCompetedOrder = false
+    },
+
     saveAdd () {
       if (this.editedIndex > -1) {
         Object.assign(this.orders[this.editedIndex], this.editedItem)

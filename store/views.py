@@ -80,9 +80,9 @@ def add_order(request):
 def add_client(request):
     request_data = json.loads(request.body)
     print(request_data)
-    client = Clients(last_name=request_data["lastName"], first_name=request_data["firstName"],
+    clients = Clients(last_name=request_data["last_name"], first_name=request_data["first_name"],
                      patronymic=request_data["patronymic"], address=request_data["address"])
-    client.save()
+    clients.save()
     return JsonResponse('Успешное добавление клиента', safe=False)
 
 
@@ -98,3 +98,46 @@ def add_nomenclature(request):
                                 count=request_data["count"])
     nomenclature.save()
     return JsonResponse('Успешное добавление товара', safe=False)
+
+
+@csrf_exempt
+def change_client(request):
+    request_data = json.loads(request.body)
+    current_client = Clients.objects.get(pk=request_data["id"])
+    current_client.last_name = request_data["last_name"]
+    current_client.first_name = request_data["first_name"]
+    current_client.patronymic = request_data["patronymic"]
+    current_client.address = request_data["address"]
+    current_client.save()
+    return JsonResponse('Успешное изменение клиента', safe=False)
+
+
+@csrf_exempt
+def change_nomenclature(request):
+    request_data = json.loads(request.body)
+    current_nomenclature = Nomenclature.objects.get(pk=request_data["id"])
+    current_nomenclature.title = request_data["title"]
+    current_nomenclature.manufacturer = Manufacturers.objects.get(pk=request_data["manufacturer"])
+    current_nomenclature.group = Groups.objects.get(pk=request_data["group"])
+    current_nomenclature.description = request_data["description"]
+    current_nomenclature.price = request_data["price"]
+    current_nomenclature.count = request_data["count"]
+    current_nomenclature.save()
+    return JsonResponse('Успешное изменение товара', safe=False)
+
+
+@csrf_exempt
+def cancel_order(request):
+    request_data = json.loads(request.body)
+    current_order = Orders.objects.get(pk=request_data["id"])
+    current_order.status = request_data["status"]
+    current_order.save()
+    return JsonResponse('Заказ отменён', safe=False)
+
+@csrf_exempt
+def completed_order(request):
+    request_data = json.loads(request.body)
+    current_order = Orders.objects.get(pk=request_data["id"])
+    current_order.status = request_data["status"]
+    current_order.save()
+    return JsonResponse('Заказ исполнен', safe=False)

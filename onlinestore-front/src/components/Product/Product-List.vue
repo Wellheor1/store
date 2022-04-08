@@ -44,14 +44,50 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+            <v-dialog v-model="dialogEditProduct" width="400">
+              <v-card>
+                <v-card-title>
+                  <span class="text-h5">Редактирование товара</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                    <v-form ref="formEdit" v-model="valid" lazy-validation>
+                      <v-text-field v-model="editedItem.title" :rules="editProductRules" label="Модель"
+                                    clearable></v-text-field>
+                      <v-autocomplete v-model="editedItem.manufacturer" :rules="editProductRules"
+                      label="Производитель" clearable :items="manufacturers.data" item-text="title"
+                                      item-value="id" @click="loadManufacturer"></v-autocomplete>
+                      <v-autocomplete v-model="editedItem.group" :rules="editProductRules"
+                      label="Категория" clearable :items="groups.data" item-text="title"
+                                      item-value="id" @click="loadGroups"></v-autocomplete>
+                      <v-text-field v-model="editedItem.count" :rules="editProductRules" label="Количество"
+                                    clearable></v-text-field>
+                      <v-text-field v-model="editedItem.price" :rules="editProductRules" label="Цена"
+                                    clearable></v-text-field>
+                      <v-text-field v-model="editedItem.description" :rules="editProductRules" label="Описание"
+                                    clearable></v-text-field>
+                    </v-form>
+                  </v-container>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="closeDialogEditProduct">Отмена</v-btn>
+                   <v-btn color="blue darken-1" :disabled="!valid" text @click="saveChangeProduct">Сохранить</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </v-card-title>
              <v-data-table :headers="headers" :items-per-page="5" :items="products[`data`]" multi-sort :search="search"
+                           :sort-desc=true sort-by="id"
                            :footer-props="{
                'items-per-page-text':'Товаров на странице:'
              }">
                <template v-slot:[`item.actions`]="{ item }">
                  <v-btn small color="success" @click="addProductToCart(item)">
                    <v-icon small>mdi-basket-plus-outline</v-icon>
+                 </v-btn>
+                 <v-btn small class="ml-2" @click="callDialogEditProduct(item)">
+                   <v-icon small>mdi-pencil</v-icon>
                  </v-btn>
                </template>
              </v-data-table>
@@ -113,6 +149,7 @@ export default {
       orderData: [],
       selectClient: null,
       dialogAddProduct: false,
+      dialogEditProduct: false,
       headers: [
         { text: 'Номер товара', value: 'id' },
         { text: 'Название', value: 'title' },
@@ -140,9 +177,21 @@ export default {
         price: null,
         description: ''
       },
+      editedItem: {
+        title: '',
+        manufacturer: '',
+        group: '',
+        count: null,
+        price: null,
+        description: ''
+      },
+      editedIndex: -1,
       groups: [],
       manufacturers: [],
       newProductRules: [
+        v => !!v || 'Обязательное поле'
+      ],
+      editProductRules: [
         v => !!v || 'Обязательное поле'
       ],
       valid: false
@@ -160,6 +209,22 @@ export default {
         this.currentProductId.push(currentItem.id)
         this.productsCart.push(currentItem)
       } else this.alertIncludeCart = true
+    },
+
+    callDialogEditProduct (item) {
+      this.editedIndex = this.products.data.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogEditProduct = true
+    },
+    closeDialogEditProduct () {
+      this.dialogEditProduct = false
+    },
+    saveChangeProduct () {
+      if (this.$refs.formEdit.validate()) {
+        Object.assign(this.products.data[this.editedIndex], this.editedItem)
+        axios.post('http://localhost:8000/api/change-nomenclature', this.editedItem)
+        this.dialogEditProduct = false
+      }
     },
     loadClientToCart () {
       axios.get('http://localhost:8000/api/clients-name')
@@ -183,6 +248,7 @@ export default {
     },
     saveNewProduct () {
       if (this.$refs.form.validate()) {
+        this.products.data.push(this.dataNewProduct)
         axios.post('http://localhost:8000/api/add-nomenclature', this.dataNewProduct)
         this.dialogAddProduct = false
       }

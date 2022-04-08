@@ -119,7 +119,7 @@ class Orders(models.Model):
         return f'Номер заказа: {self.id}'
 
     def get_orders(params=None):
-        orders = Orders.objects.all()
+        orders = Orders.objects.all().filter(status="Новый")
         data_serializer = [{
             "id": order.id,
             "name_client": order.client.__str__(),
