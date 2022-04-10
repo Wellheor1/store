@@ -83,10 +83,10 @@
                'items-per-page-text':'Товаров на странице:'
              }">
                <template v-slot:[`item.actions`]="{ item }">
-                 <v-btn small color="success" @click="addProductToCart(item)">
+                 <v-btn small class="mr-2" color="success" @click="addProductToCart(item)">
                    <v-icon small>mdi-basket-plus-outline</v-icon>
                  </v-btn>
-                 <v-btn small class="ml-2" @click="callDialogEditProduct(item)">
+                 <v-btn small @click="callDialogEditProduct(item)">
                    <v-icon small>mdi-pencil</v-icon>
                  </v-btn>
                </template>
@@ -117,6 +117,18 @@
                <template v-slot:[`item.actions`]="{ item }">
                 <v-icon small class="mr-2" @click="deleteCurrentProductInCurt(item)">mdi-delete</v-icon>
                </template>
+                <template v-slot:[`item.count`]="props">
+                  <v-edit-dialog
+                    :return-value.sync="props.item.count" @save="save(props.item.count)" @cancel="cancel" @open="open" @close="close1"
+                    large save-text="Сохранить" cancel-text="Отмена">
+                    {{ props.item.count }}
+                    <template v-slot:input>
+                      <v-text-field v-model="props.item.count" label="Редактирование" single-line
+                                    counter
+                      ></v-text-field>
+                    </template>
+                  </v-edit-dialog>
+                </template>
              </v-data-table>
           <v-row justify="center">
             <v-col cols="12" xs="12" sm="6" md="4">
@@ -145,6 +157,7 @@ export default {
       currentProductId: [],
       alertIncludeCart: false,
       deleteIndex: '',
+      productObject: {},
       clients: [],
       orderData: [],
       selectClient: null,
@@ -207,7 +220,10 @@ export default {
     addProductToCart: function (currentItem) {
       if (!this.currentProductId.includes(currentItem.id)) {
         this.currentProductId.push(currentItem.id)
-        this.productsCart.push(currentItem)
+        currentItem.count--
+        this.productObject = Object.assign({}, currentItem)
+        this.productObject.count = 1
+        this.productsCart.push(this.productObject)
       } else this.alertIncludeCart = true
     },
 
@@ -264,7 +280,13 @@ export default {
         .then((response) => {
           this.groups = response.data
         })
-    }
+    },
+    save (item) {
+      alert(item)
+    },
+    cancel () {},
+    open () {},
+    close1 () {}
   },
   mounted () {
     this.getProducts()

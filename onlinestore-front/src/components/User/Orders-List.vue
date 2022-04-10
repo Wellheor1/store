@@ -43,7 +43,7 @@
                     large save-text="Сохранить" cancel-text="Отмена">
                     {{ props.item.count }}
                     <template v-slot:input>
-                      <v-text-field v-model="props.item.count" :rules="[max25chars]" label="Редактирование" single-line
+                      <v-text-field v-model="props.item.count" label="Редактирование" single-line
                                     counter
                       ></v-text-field>
                     </template>
@@ -84,20 +84,11 @@ export default {
   data () {
     return {
       search: '',
-      searchTree: null,
-      searchClients: '',
-      dialogAdd: false,
-      dialogEdit: false,
       dialogCancelOrder: false,
       dialogDetail: false,
       dialogCompetedOrder: false,
-      currentItem: '',
       currentProducts: {},
       orders: {},
-      selection: [],
-      selectionType: 'leaf',
-      max25chars: v => v.length <= 25 || 'Input too long!',
-      productsTree: [],
       clients: [],
       headers: [
         { text: 'Номер заказа', value: 'id' },
@@ -114,27 +105,18 @@ export default {
         { text: 'Цена', value: 'price' },
         { text: 'Действия', value: 'actions', sortable: false }
       ],
-      dialogTitle: '',
-      editedIndex: -1,
+      itemIndex: -1,
+      itemId: -1,
       editedItem: {
         title: '',
         manufacturer: '',
         count: '',
         price: ''
-      },
-      defaultItem: {
-        date_time: '',
-        name_client: '',
-        client_address: '',
-        products: '',
-        manufacturer: '',
-        price: '',
-        count: ''
       }
     }
   },
   methods: {
-    getOrders () {
+    getNewOrders () {
       axios.get('http://localhost:8000/api/orders')
         .then((response) => {
           this.orders = response.data
@@ -147,98 +129,49 @@ export default {
         })
       this.dialogDetail = true
     },
-    addOrder () {
-      axios.get('http://localhost:8000/api/clients-select')
-        .then((response) => {
-          this.clients = response.data
-        })
-      axios.get('http://localhost:8000/api/products-tree')
-        .then((response) => {
-          this.productsTree = response.data
-        })
-      this.dialogAdd = true
-    },
-    editItem (item) {
-      this.editedIndex = this.orders.data.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogEdit = true
-    },
     callDialogCancelOrder (item) {
-      this.editedIndex = item.id
+      this.itemId = item.id
+      this.itemIndex = this.orders.data.indexOf(item)
       this.dialogCancelOrder = true
     },
     callDialogCompletedOrder (item) {
-      this.editedIndex = item.id
+      this.itemId = item.id
+      this.itemIndex = this.orders.data.indexOf(item)
       this.dialogCompetedOrder = true
     },
     deleteCurrentProduct (item) {
-      this.editedIndex = this.currentProducts.product.indexOf(item)
+      this.itemIndex = this.currentProducts.product.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.currentProducts.product.splice(this.editedIndex, 1)
     },
     cancelOrderConfirm () {
-      axios.post('http://localhost:8000/api/cancel-order', { id: this.editedIndex, status: 'Отменён' })
+      axios.post('http://localhost:8000/api/cancel-order', { id: this.itemId, status: 'Отменён' })
+      this.orders.data.splice(this.itemIndex, 1)
       this.dialogCancelOrder = false
     },
     completedOrderConfirm () {
-      axios.post('http://localhost:8000/api/completed-order', { id: this.editedIndex, status: 'Выполнен' })
+      axios.post('http://localhost:8000/api/completed-order', { id: this.itemId, status: 'Выполнен' })
+      this.orders.data.splice(this.itemIndex, 1)
       this.dialogCompetedOrder = false
-    },
-    close () {
-      this.dialogAdd = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
     },
     closeDetail () {
       this.dialogDetail = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
     },
     closeDialogCancel () {
       this.dialogCancelOrder = false
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      })
     },
     closeDialogComleted () {
       this.dialogCompetedOrder = false
-    },
-
-    saveAdd () {
-      if (this.editedIndex > -1) {
-        Object.assign(this.orders[this.editedIndex], this.editedItem)
-      } else {
-        this.orders.push(this.editedItem)
-      }
-      this.close()
     },
     save () {},
     cancel () {},
     open () {},
     close1 () {}
   },
-  watch: {
-    dialogAdd (val) {
-      val || this.close()
-    },
-    dialogDelete (val) {
-      val || this.closeDelete()
-    },
-    dialogDetail (val) {
-      val || this.closeDetail()
-    }
-  },
   mounted () {
-    this.getOrders()
+    this.getNewOrders()
   }
 }
 </script>
-
 <style scoped>
-
 </style>
