@@ -39,11 +39,11 @@
               }">
                 <template v-slot:[`item.count`]="props">
                   <v-edit-dialog
-                    :return-value.sync="props.item.count" @save="save" @cancel="cancel" @open="open" @close="close1"
+                    :return-value.sync="props.item.count" @save="save(props)" @cancel="cancel" @open="open" @close="close1"
                     large save-text="Сохранить" cancel-text="Отмена">
                     {{ props.item.count }}
                     <template v-slot:input>
-                      <v-text-field v-model="props.item.count" label="Редактирование" single-line
+                      <v-text-field type="number" v-model="props.item.count" label="Редактирование" single-line
                                     counter
                       ></v-text-field>
                     </template>
@@ -163,7 +163,9 @@ export default {
     closeDialogComleted () {
       this.dialogCompetedOrder = false
     },
-    save () {},
+    save (props) {
+      axios.post('http://localhost:8000/api/change-order', { id: props.item.id, count: props.item.count })
+    },
     cancel () {},
     open () {},
     close1 () {}

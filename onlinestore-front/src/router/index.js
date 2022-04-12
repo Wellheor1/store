@@ -5,9 +5,9 @@ import Home from '@/components/Home-page'
 import Product from '@/components/Product/Pro-duct'
 import Clients from '@/components/Clients-list'
 import Products from '@/components/Product/Product-List'
-import Orders from '@/components/User/Orders-List'
+import Orders from '@/components/Orders-List'
 import Login from '@/components/Auth/Log-in'
-import Register from '@/components/Auth/Regis-ter'
+import Reports from '@/components/Reports-List'
 
 // Vue.use(VueRouter)
 Vue.use(Router)
@@ -46,9 +46,9 @@ export default new Router({
       component: Login
     },
     {
-      path: '/register',
-      name: 'register',
-      component: Register
+      path: '/reports',
+      name: 'reports',
+      component: Reports
     }
   ]
 })

@@ -47,10 +47,10 @@ export default {
       drawer: null,
       links: [
         { title: 'Вход', icon: 'mdi-account-box', url: '/login' },
-        // { title: 'Регистрация', icon: 'mdi-face-man', url: '/register' },
         { title: 'Заказы', icon: 'mdi-cart', url: '/orders' },
         { title: 'Клиенты', icon: 'mdi-account', url: '/clients' },
-        { title: 'Товары', icon: 'mdi-format-list-bulleted', url: '/products' }
+        { title: 'Товары', icon: 'mdi-format-list-bulleted', url: '/products' },
+        { title: 'Отчёты', icon: 'mdi-chart-box', url: '/reports' }
       ]
     }
   }

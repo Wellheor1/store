@@ -44,6 +44,16 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+             <v-dialog v-model="dialogConfirmAdd" width="650">
+                  <v-card>
+                    <v-card-title class="text-h5">Заказ добавлен</v-card-title>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="dialogConfirmAddClose">Ок</v-btn>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                 </v-card>
+          </v-dialog>
             <v-dialog v-model="dialogEditProduct" width="400">
               <v-card>
                 <v-card-title>
@@ -119,13 +129,12 @@
                </template>
                 <template v-slot:[`item.count`]="props">
                   <v-edit-dialog
-                    :return-value.sync="props.item.count" @save="save(props.item.count)" @cancel="cancel" @open="open" @close="close1"
-                    large save-text="Сохранить" cancel-text="Отмена">
+                    :return-value.sync="props.item.count" @save="saveEditCount(props)" @cancel="cancel" @open="open" @close="close1"
+                    large save-text="Сохранить" cancel-text="Отмена" type="number">
                     {{ props.item.count }}
                     <template v-slot:input>
-                      <v-text-field v-model="props.item.count" label="Редактирование" single-line
-                                    counter
-                      ></v-text-field>
+                      <v-text-field type="number" v-model="props.item.count" label="Редактирование" single-line>
+                      </v-text-field>
                     </template>
                   </v-edit-dialog>
                 </template>
@@ -163,6 +172,7 @@ export default {
       selectClient: null,
       dialogAddProduct: false,
       dialogEditProduct: false,
+      dialogConfirmAdd: false,
       headers: [
         { text: 'Номер товара', value: 'id' },
         { text: 'Название', value: 'title' },
@@ -251,6 +261,7 @@ export default {
     toOrder () {
       axios.post('http://localhost:8000/api/add-order',
         { products: this.productsCart, client: this.selectClient.id })
+      this.dialogConfirmAdd = true
     },
     deleteCurrentProductInCurt (item) {
       this.productsCart.splice(this.productsCart.indexOf(item), 1)
@@ -281,9 +292,10 @@ export default {
           this.groups = response.data
         })
     },
-    save (item) {
-      alert(item)
+    dialogConfirmAddClose () {
+      this.dialogConfirmAdd = false
     },
+    saveEditCount () {},
     cancel () {},
     open () {},
     close1 () {}
