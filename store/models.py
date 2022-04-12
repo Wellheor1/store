@@ -254,13 +254,13 @@ class Orders(models.Model):
                 current_product.save()
             else:
                 print('на стока увеличить низзя')
-        elif change_count == 0:
-            print('0 есть 0')
-        else:
+        elif change_count < 0:
             if current_product.count - change_count <= 0:
                 print('Надо уже удалять тогда')
             else:
-                current_count_fact.count += change_count
+                current_count_fact.count -= change_count
                 current_count_fact.save()
-                current_product.count -= change_count
+                current_product.count += change_count
                 current_product.save()
+        else:
+            print('0 есть 0')
