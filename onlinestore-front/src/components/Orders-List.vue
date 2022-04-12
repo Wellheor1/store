@@ -39,7 +39,7 @@
               }">
                 <template v-slot:[`item.count`]="props">
                   <v-edit-dialog
-                    :return-value.sync="props.item.count" @save="save(props)" @cancel="cancel" @open="open" @close="close1"
+                    :return-value.sync="props.item.count" @save="save(props)" @cancel="cancel" @open="open" @close="close"
                     large save-text="Сохранить" cancel-text="Отмена">
                     {{ props.item.count }}
                     <template v-slot:input>
@@ -107,6 +107,7 @@ export default {
       ],
       itemIndex: -1,
       itemId: -1,
+      orderId: -1,
       editedItem: {
         title: '',
         manufacturer: '',
@@ -126,6 +127,7 @@ export default {
       axios.post('http://localhost:8000/api/current-product', { pk: item.id })
         .then((response) => {
           this.currentProducts = response.data
+          this.orderId = item.id
         })
       this.dialogDetail = true
     },
@@ -140,8 +142,8 @@ export default {
       this.dialogCompetedOrder = true
     },
     deleteCurrentProduct (item) {
+      axios.post('http://localhost:8000/api/delete-current-product', { id_product: item.id, id_order: this.orderId })
       this.itemIndex = this.currentProducts.product.indexOf(item)
-      this.editedItem = Object.assign({}, item)
       this.currentProducts.product.splice(this.editedIndex, 1)
     },
     cancelOrderConfirm () {
@@ -164,11 +166,11 @@ export default {
       this.dialogCompetedOrder = false
     },
     save (props) {
-      axios.post('http://localhost:8000/api/change-order', { id: props.item.id, count: props.item.count })
+      axios.post('http://localhost:8000/api/change-count-product-order', { id: props.item.id, count: props.item.count })
     },
     cancel () {},
     open () {},
-    close1 () {}
+    close () {}
   },
   mounted () {
     this.getNewOrders()

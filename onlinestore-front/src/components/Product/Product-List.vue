@@ -236,7 +236,6 @@ export default {
         this.productsCart.push(this.productObject)
       } else this.alertIncludeCart = true
     },
-
     callDialogEditProduct (item) {
       this.editedIndex = this.products.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
@@ -262,6 +261,7 @@ export default {
       axios.post('http://localhost:8000/api/add-order',
         { products: this.productsCart, client: this.selectClient.id })
       this.dialogConfirmAdd = true
+      this.productsCart = []
     },
     deleteCurrentProductInCurt (item) {
       this.productsCart.splice(this.productsCart.indexOf(item), 1)

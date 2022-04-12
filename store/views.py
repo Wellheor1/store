@@ -81,6 +81,12 @@ def get_current_products(request):
     data_serializer = Orders.get_current_products(request_data)
     return JsonResponse(data_serializer)
 
+@csrf_exempt
+def delete_current_product(request):
+    request_data = json.loads(request.body)
+    data_serializer = Orders.delete_current_product(request_data)
+    return JsonResponse('Товар удалён из заказа', safe=False)
+
 
 @csrf_exempt
 def add_order(request):
@@ -104,8 +110,8 @@ def completed_order(request):
 
 
 @csrf_exempt
-def change_order(request):
+def change_count_product_order(request):
     request_data = json.loads(request.body)
-    Orders.change_order(request_data)
+    Orders.change_count_product_order(request_data)
     return JsonResponse('Заказ изменён', safe=False)
 

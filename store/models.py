@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Clients(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -119,6 +120,7 @@ class Nomenclature(models.Model):
         current_nomenclature.save()
         return 'Успешное изменение товара'
 
+
 class Products(models.Model):
     nomenclature = models.ForeignKey(Nomenclature, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -190,15 +192,26 @@ class Orders(models.Model):
         return data_serializer
 
     @staticmethod
+    def delete_current_product(request_data):
+        current_order = Orders.objects.get(pk=request_data["id_order"])
+        current_product = current_order.products.get(pk=request_data["id_product"])
+        current_product_fact = current_product.nomenclature
+        current_product_fact.count += current_product.count
+        current_product_fact.save()
+        current_order.products.remove(current_product)
+        current_order.save()
+        return 'Товар удалён из заказа'
+
+    @staticmethod
     def add_order(request_data):
         product = []
         for data in request_data["products"]:
-            if data["count"] <= Nomenclature.objects.get(pk=data["id"]).count:
-                b = Nomenclature.objects.get(pk=data["id"])
-                b.count -= data["count"]
-                b.save()
+            if int(data["count"]) <= Nomenclature.objects.get(pk=data["id"]).count:
+                product_fact = Nomenclature.objects.get(pk=data["id"])
+                product_fact.count -= int(data["count"])
+                product_fact.save()
                 product.append(Products.objects.create(nomenclature_id=data["id"], price=data["price"],
-                                                       count=data["count"]))
+                                                       count=int(data["count"])))
             else:
                 print("Товаров на остатке меньше")
                 continue
@@ -211,6 +224,13 @@ class Orders(models.Model):
     def cancel_order(request_data):
         current_order = Orders.objects.get(pk=request_data["id"])
         current_order.status = request_data["status"]
+        for i in current_order.products.all():
+            order_product = i
+            count_product_fact = i.nomenclature
+            count_product_fact.count += order_product.count
+            count_product_fact.save()
+            order_product.count -= order_product.count
+            order_product.save()
         current_order.save()
         return 'Заказ отменён'
 
@@ -221,25 +241,26 @@ class Orders(models.Model):
         current_order.save()
         return 'Заказ исполнен'
 
-
     @staticmethod
-    def change_order(request_data):
+    def change_count_product_order(request_data):
         current_product = Products.objects.get(pk=request_data["id"])
-        сhange = int(request_data["count"]) - current_product.count
+        change_count = int(request_data["count"]) - current_product.count
         current_count_fact = Nomenclature.objects.get(pk=current_product.nomenclature.id)
-        if сhange > 0:
-            if сhange <= current_count_fact.count:
-                current_count_fact.count -= сhange
+        if change_count > 0:
+            if change_count <= current_count_fact.count:
+                current_count_fact.count -= change_count
                 current_count_fact.save()
-                current_product.count += сhange
+                current_product.count += change_count
                 current_product.save()
             else:
                 print('на стока увеличить низзя')
-        elif сhange == 0:
+        elif change_count == 0:
             print('0 есть 0')
         else:
-            current_product.count - сhange
-            if current_product.count <= 0:
+            if current_product.count - change_count <= 0:
                 print('Надо уже удалять тогда')
             else:
+                current_count_fact.count += change_count
+                current_count_fact.save()
+                current_product.count -= change_count
                 current_product.save()

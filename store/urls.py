@@ -13,9 +13,10 @@ urlpatterns = [
     path('api/change-nomenclature', views.change_nomenclature),
     path('api/products', views.get_products_list),
     path('api/current-product', views.get_current_products),
+    path('api/delete-current-product', views.delete_current_product),
     path('api/orders', views.get_orders_list),
     path('api/cancel-order', views.cancel_order),
     path('api/completed-order', views.completed_order),
     path('api/add-order', views.add_order),
-    path('api/change-order', views.change_order)
+    path('api/change-count-product-order', views.change_count_product_order)
 ]
