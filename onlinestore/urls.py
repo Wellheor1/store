@@ -22,7 +22,7 @@ import store.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include('store.urls'))
-    path('', onlinestore_front.TemplateView.as_view()),
+    path('api/', include('store.urls')),
+    path('', store.views.home)
 ]
-urlpatterns += staticfiles_urlpatterns
+
