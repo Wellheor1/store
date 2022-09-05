@@ -1,9 +1,13 @@
 import json
 
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http.response import JsonResponse
 from .models import Products, Clients, Groups, Nomenclature, Manufacturers, Orders
 
+@csrf_exempt
+def home(request):
+    return render(request, '/index.html')
 
 @csrf_exempt
 def get_clients_list(request):

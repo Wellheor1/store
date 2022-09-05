@@ -3,3 +3,4 @@ __pycache__/
 .idea/
 *package-lock.json
 *.pyc
+/onlinestore/local_settings.py

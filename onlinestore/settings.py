@@ -15,6 +15,8 @@ import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.template import context_processors
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8+zug1z2-#culp+5@i86kwklv^ulv*n*_06w!%uq9bg51w#8qj'
+SECRET_KEY = None
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -60,7 +62,7 @@ ROOT_URLCONF = 'onlinestore.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'context_processors.utils.local_settings'
             ],
         },
     },
@@ -125,14 +128,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = '/onlinstore-front/src/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'onlinstore-front/')
+STATIC_URL = '/onlinstore-front/dist/'
+STATIC_ROOT = BASE_DIR / 'static/'
 
-#STATICFILES_DIRS = [
-#    os.path.join(BASE_DIR, "src")
-#]
+# STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "dist")
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+try:
+    from onlinestore.local_settings import *  # noqa: F403,F401
+except ImportError:
+    pass
