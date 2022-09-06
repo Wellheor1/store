@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 /onlinestore/local_settings.py
 /static/webpack_build/
+/templates/
