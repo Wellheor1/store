@@ -10,7 +10,7 @@
             <v-spacer></v-spacer>
             <v-dialog v-model="dialogAddProduct" width="400">
               <template v-slot:activator="{ attrs }">
-                <v-btn color="primary" dark v-bind="attrs" @click="callDialogAddProduct">Добавить товар</v-btn>
+                <v-btn color="primary" dark v-bind="attrs" @click="openDialogAddProduct">Добавить товар</v-btn>
               </template>
               <v-card>
                 <v-card-title>
@@ -21,7 +21,7 @@
                     <v-form ref="form" v-model="valid" lazy-validation>
                       <v-text-field :rules="newProductRules" label="Название" v-model="dataNewProduct.title" required>
                       </v-text-field>
-                      <v-autocomplete :rules="newProductRules" label="Производитель" @click="loadManufacturer"
+                      <v-autocomplete :rules="newProductRules" label="Производитель" @click="getManufacturer"
                                       v-model="dataNewProduct.manufacturer"
                                       required :items="manufacturers.data" item-text="title" item-value="id">
                       </v-autocomplete>
@@ -62,19 +62,19 @@
                 <v-card-text>
                   <v-container>
                     <v-form ref="formEdit" v-model="valid" lazy-validation>
-                      <v-text-field v-model="editedItem.title" :rules="editProductRules" label="Модель"
+                      <v-text-field v-model="editedProductData.title" :rules="editProductRules" label="Модель"
                                     clearable></v-text-field>
-                      <v-autocomplete v-model="editedItem.manufacturer" :rules="editProductRules"
-                      label="Производитель" clearable :items="manufacturers.data" item-text="title"
-                                      item-value="id" @click="loadManufacturer"></v-autocomplete>
-                      <v-autocomplete v-model="editedItem.group" :rules="editProductRules"
-                      label="Категория" clearable :items="groups.data" item-text="title"
+                      <v-autocomplete v-model="editedProductData.manufacturer" :rules="editProductRules"
+                                      label="Производитель" clearable :items="manufacturers.data" item-text="title"
+                                      item-value="id" @click="getManufacturer"></v-autocomplete>
+                      <v-autocomplete v-model="editedProductData.group" :rules="editProductRules"
+                                      label="Категория" clearable :items="groups.data" item-text="title"
                                       item-value="id" @click="loadGroups"></v-autocomplete>
-                      <v-text-field v-model="editedItem.count" :rules="editProductRules" label="Количество"
+                      <v-text-field v-model="editedProductData.count" :rules="editProductRules" label="Количество"
                                     clearable></v-text-field>
-                      <v-text-field v-model="editedItem.price" :rules="editProductRules" label="Цена"
+                      <v-text-field v-model="editedProductData.price" :rules="editProductRules" label="Цена"
                                     clearable></v-text-field>
-                      <v-text-field v-model="editedItem.description" :rules="editProductRules" label="Описание"
+                      <v-text-field v-model="editedProductData.description" :rules="editProductRules" label="Описание"
                                     clearable></v-text-field>
                     </v-form>
                   </v-container>
@@ -96,7 +96,7 @@
                  <v-btn small class="mr-2" color="success" @click="addProductToCart(item)">
                    <v-icon small>mdi-basket-plus-outline</v-icon>
                  </v-btn>
-                 <v-btn small @click="callDialogEditProduct(item)">
+                 <v-btn small @click="openDialogEditProduct(item)">
                    <v-icon small>mdi-pencil</v-icon>
                  </v-btn>
                </template>
@@ -141,10 +141,10 @@
              </v-data-table>
           <v-row justify="center">
             <v-col cols="12" xs="12" sm="6" md="4">
-            <v-autocomplete @click="loadClientToCart" label="Поиск клиента" :items="clients" item-text="name"
+            <v-autocomplete @click="getClient" label="Поиск клиента" :items="clients" item-text="name"
                             item-value="id" return-object v-model="selectClient">
             </v-autocomplete>
-              <v-btn color="primary" @click="toOrder">Заказать</v-btn>
+              <v-btn color="primary" @click="addOrder">Заказать</v-btn>
           </v-col>
           </v-row>
         </v-card>
@@ -200,7 +200,7 @@ export default {
         price: null,
         description: ''
       },
-      editedItem: {
+      editedProductData: {
         title: '',
         manufacturer: '',
         group: '',
@@ -221,45 +221,43 @@ export default {
     }
   },
   methods: {
-    getProducts () {
-      axios.get('http://localhost:8000/api/nomenclature')
-        .then((response) => {
-          this.products = response.data
-        })
+    async getProducts () {
+      const response = await axios.get('http://localhost:8000/api/nomenclature')
+      this.products = response.data
     },
     addProductToCart: function (currentItem) {
       if (!this.currentProductId.includes(currentItem.id)) {
         this.currentProductId.push(currentItem.id)
-        currentItem.count--
         this.productObject = Object.assign({}, currentItem)
         this.productObject.count = 1
         this.productsCart.push(this.productObject)
       } else this.alertIncludeCart = true
     },
-    callDialogEditProduct (item) {
+    openDialogEditProduct (item) {
       this.editedIndex = this.products.data.indexOf(item)
-      this.editedItem = Object.assign({}, item)
+      // const currentProduct = this.product.data.find(product => product.id === item.id)
+      // console.log(currentProduct)
+      this.editedProductData = Object.assign({}, item)
       this.dialogEditProduct = true
     },
     closeDialogEditProduct () {
       this.dialogEditProduct = false
     },
-    saveChangeProduct () {
+    async saveChangeProduct () {
       if (this.$refs.formEdit.validate()) {
-        Object.assign(this.products.data[this.editedIndex], this.editedItem)
-        axios.post('http://localhost:8000/api/change-nomenclature', this.editedItem)
+        await axios.post('http://localhost:8000/api/change-nomenclature', this.editedProductData)
+        await this.getProducts()
         this.dialogEditProduct = false
       }
     },
-    loadClientToCart () {
-      axios.get('http://localhost:8000/api/clients-name')
-        .then((response) => {
-          this.clients = response.data
-        })
+    async getClient () {
+      const response = await axios.get('http://localhost:8000/api/clients-name')
+      this.clients = response.data
     },
-    toOrder () {
-      axios.post('http://localhost:8000/api/add-order',
+    async addOrder () {
+      await axios.post('http://localhost:8000/api/add-order',
         { products: this.productsCart, client: this.selectClient.id })
+      await this.getProducts()
       this.dialogConfirmAdd = true
       this.productsCart = []
     },
@@ -267,41 +265,42 @@ export default {
       this.productsCart.splice(this.productsCart.indexOf(item), 1)
       this.currentProductId.splice(this.currentProductId.indexOf(item), 1)
     },
-    callDialogAddProduct () {
+    openDialogAddProduct () {
       this.dialogAddProduct = true
     },
     closeDialogAddProduct () {
       this.dialogAddProduct = false
     },
-    saveNewProduct () {
+    async saveNewProduct () {
       if (this.$refs.form.validate()) {
-        this.products.data.push(this.dataNewProduct)
-        axios.post('http://localhost:8000/api/add-nomenclature', this.dataNewProduct)
+        await axios.post('http://localhost:8000/api/add-nomenclature', this.dataNewProduct)
+        this.dataNewProduct = ''
+        await this.getProducts()
         this.dialogAddProduct = false
       }
     },
-    loadManufacturer () {
-      axios.get('http://localhost:8000/api/manufacturers')
-        .then((response) => {
-          this.manufacturers = response.data
-        })
+    async getManufacturer () {
+      const response = await axios.get('http://localhost:8000/api/manufacturers')
+      this.manufacturers = response.data
     },
-    loadGroups () {
-      axios.get('http://localhost:8000/api/groups')
-        .then((response) => {
-          this.groups = response.data
-        })
+    async loadGroups () {
+      const response = await axios.get('http://localhost:8000/api/groups')
+      this.groups = response.data
     },
     dialogConfirmAddClose () {
       this.dialogConfirmAdd = false
     },
-    saveEditCount () {},
+    saveEditCount (props) {
+      const startPrice = this.products.data.find(product => product.id === props.item.id).price
+      props.item.price = props.item.count * startPrice
+    },
     cancel () {},
     open () {},
     close1 () {}
   },
   mounted () {
     this.getProducts()
+    this.getManufacturer()
   }
 }
 </script>

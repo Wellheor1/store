@@ -66,9 +66,9 @@
               'items-per-page-text':'Заказов на странице:'
             }">
               <template v-slot:[`item.actions`]="{ item }">
-                <v-icon small color="success" class="mr-2" @click="callDialogCompletedOrder(item)">mdi-check-bold</v-icon>
-                <v-icon small class="mr-2" @click="loadCurrentProducts(item)">mdi-eye</v-icon>
-                <v-icon small @click="callDialogCancelOrder(item)">mdi-delete</v-icon>
+                <v-icon small color="success" class="mr-2" @click="openDialogCompletedOrder(item)">mdi-check-bold</v-icon>
+                <v-icon small class="mr-2" @click="getCurrentProducts(item)">mdi-eye</v-icon>
+                <v-icon small @click="openDialogCancelOrder(item)">mdi-delete</v-icon>
               </template>
           </v-data-table>
         </v-card>
@@ -117,32 +117,28 @@ export default {
     }
   },
   methods: {
-    getNewOrders () {
-      axios.get('http://localhost:8000/api/orders')
-        .then((response) => {
-          this.orders = response.data
-        })
+    async getNewOrders () {
+      const response = await axios.get('http://localhost:8000/api/orders')
+      this.orders = response.data
     },
-    loadCurrentProducts (item) {
-      axios.post('http://localhost:8000/api/current-product', { pk: item.id })
-        .then((response) => {
-          this.currentProducts = response.data
-          this.orderId = item.id
-        })
+    async getCurrentProducts (item) {
+      const response = await axios.post('http://localhost:8000/api/current-product', { pk: item.id })
+      this.currentProducts = response.data
+      this.orderId = item.id
       this.dialogDetail = true
     },
-    callDialogCancelOrder (item) {
+    openDialogCancelOrder (item) {
       this.itemId = item.id
       this.itemIndex = this.orders.data.indexOf(item)
       this.dialogCancelOrder = true
     },
-    callDialogCompletedOrder (item) {
+    openDialogCompletedOrder (item) {
       this.itemId = item.id
       this.itemIndex = this.orders.data.indexOf(item)
       this.dialogCompetedOrder = true
     },
-    deleteCurrentProduct (item) {
-      axios.post('http://localhost:8000/api/delete-current-product', { id_product: item.id, id_order: this.orderId })
+    async deleteCurrentProduct (item) {
+      await axios.post('http://localhost:8000/api/delete-current-product', { id_product: item.id, id_order: this.orderId })
       this.itemIndex = this.currentProducts.product.indexOf(item)
       this.currentProducts.product.splice(this.editedIndex, 1)
     },

@@ -11,7 +11,7 @@
             <v-spacer></v-spacer>
              <v-dialog v-model="dialogAddClient" width="400">
               <template v-slot:activator="{ attrs }">
-                <v-btn color="primary" dark v-bind="attrs" @click="callDialogAddClient">Добавить клиента</v-btn>
+                <v-btn color="primary" dark v-bind="attrs" @click="openDialogAddClient">Добавить клиента</v-btn>
               </template>
               <v-card>
                 <v-card-title>
@@ -71,7 +71,7 @@
                'items-per-page-text':'Клиентов на странице:'
               }">
                <template v-slot:[`item.actions`]="{ item }">
-                <v-icon small @click="callDialogEditClient(item)">mdi-pencil</v-icon>
+                <v-icon small @click="openDialogEditClient(item)">mdi-pencil</v-icon>
                </template>
              </v-data-table>
         </v-card>
@@ -123,26 +123,24 @@ export default {
     }
   },
   methods: {
-    getClients () {
-      axios.get('http://localhost:8000/api/clients')
-        .then((response) => {
-          this.clients = response.data
-        })
+    async getClients () {
+      const response = await axios.get('http://localhost:8000/api/clients')
+      this.clients = response.data
     },
-    callDialogAddClient () {
+    openDialogAddClient () {
       this.dialogAddClient = true
     },
     closeDialogAddClient () {
       this.dialogAddClient = false
     },
-    saveNewClient () {
+    async saveNewClient () {
       if (this.$refs.form.validate()) {
-        axios.post('http://localhost:8000/api/add-client', this.dataNewClient)
-        this.clients.data.push(this.dataNewClient)
+        await axios.post('http://localhost:8000/api/add-client', this.dataNewClient)
+        await this.getClients()
         this.dialogAddClient = false
       }
     },
-    callDialogEditClient (item) {
+    openDialogEditClient (item) {
       this.editedIndex = this.clients.data.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogEditClient = true
@@ -150,10 +148,10 @@ export default {
     closeDialogEditClient () {
       this.dialogEditClient = false
     },
-    saveChangeClient () {
+    async saveChangeClient () {
       if (this.$refs.formEdit.validate()) {
-        Object.assign(this.clients.data[this.editedIndex], this.editedItem)
-        axios.post('http://localhost:8000/api/change-client', this.editedItem)
+        await axios.post('http://localhost:8000/api/change-client', this.editedItem)
+        await this.getClients()
         this.dialogEditClient = false
       }
     }
